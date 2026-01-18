@@ -24,8 +24,17 @@ Route::middleware(['auth', 'role:user'])->group(function () {
 });
 
 // --- GROUP ADMIN ---
-Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('/admin/dashboard', function () { return view('admin.dashboard'); })->name('admin.dashboard');
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [App\Http\Controllers\AdminController::class, 'dashboard'])->name('dashboard');
+    Route::get('/kelola-vendor', [App\Http\Controllers\AdminController::class, 'kelolaVendor'])->name('kelola-vendor');
+    Route::get('/kelola-vendor/create', [App\Http\Controllers\AdminController::class, 'createVendor'])->name('kelola-vendor.create');
+    Route::post('/kelola-vendor', [App\Http\Controllers\AdminController::class, 'storeVendor'])->name('kelola-vendor.store');
+    Route::get('/kelola-vendor/{vendor}', [App\Http\Controllers\AdminController::class, 'showVendor'])->name('kelola-vendor.show');
+    Route::get('/kelola-vendor/{vendor}/edit', [App\Http\Controllers\AdminController::class, 'editVendor'])->name('kelola-vendor.edit');
+    Route::put('/kelola-vendor/{vendor}', [App\Http\Controllers\AdminController::class, 'updateVendor'])->name('kelola-vendor.update');
+    Route::patch('/kelola-vendor/{vendor}/toggle-status', [App\Http\Controllers\AdminController::class, 'toggleVendorStatus'])->name('kelola-vendor.toggle-status');
+    Route::delete('/kelola-vendor/{vendor}', [App\Http\Controllers\AdminController::class, 'destroyVendor'])->name('kelola-vendor.destroy');
+    Route::get('/laporan-transaksi', [App\Http\Controllers\AdminController::class, 'laporanTransaksi'])->name('laporan-transaksi');
 });
 
 // --- GROUP PENJUAL ---
@@ -44,4 +53,9 @@ Route::middleware(['auth', 'role:penjual'])->prefix('penjual')->name('penjual.')
     // Saldo & Riwayat Pesanan
     Route::get('/saldo', [\App\Http\Controllers\Penjual\SaldoController::class, 'index'])->name('saldo.index');
     Route::get('/saldo/{id}/detail', [\App\Http\Controllers\Penjual\SaldoController::class, 'detail'])->name('saldo.detail');
+});
+
+// --- API Routes ---
+Route::middleware(['auth', 'role:admin'])->prefix('api')->group(function () {
+    Route::get('/vendor/{vendor}/stats', [App\Http\Controllers\AdminController::class, 'getVendorStats']);
 });

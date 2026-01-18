@@ -76,6 +76,13 @@
         <div class="login-footer">
             <!-- Sekarang link ini akan mengarah ke halaman Forgot Password yang baru kita buat -->
             <a href="{{ route('password.request') }}">FORGOT PASSWORD?</a>
+            <br><br>
+            <small style="color:#666; font-size:11px;">
+                <strong>Testing Accounts:</strong><br>
+                Admin: admin_up / password123<br>
+                Penjual: penjual_up / password123<br>
+                Mahasiswa: mahasiswa_up / password123
+            </small>
         </div>
     </div>
 

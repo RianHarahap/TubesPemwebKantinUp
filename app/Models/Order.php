@@ -5,7 +5,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
 {
-    protected $fillable = ['user_id', 'vendor_id', 'menu_id', 'nomor_antrean', 'total_harga', 'status', 'estimasi_menit', 'nama_pembeli', 'jumlah'];
+    protected $fillable = ['user_id', 'vendor_id', 'menu_id', 'menu_name', 'jumlah', 'nomor_antrean', 'total_harga', 'status', 'estimasi_menit', 'nama_pembeli'];
 
     public function menu() {
         return $this->belongsTo(Menu::class);

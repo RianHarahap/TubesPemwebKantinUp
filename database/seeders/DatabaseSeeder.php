@@ -75,9 +75,13 @@ class DatabaseSeeder extends Seeder
         $queueNumbers = ['A-001', 'A-002', 'B-001', 'B-002', 'C-001'];
 
         for ($i = 0; $i < 5; $i++) {
+            $menu = \App\Models\Menu::where('vendor_id', 1)->first();
             \App\Models\Order::create([
                 'user_id' => 1,  // mahasiswa_up
                 'vendor_id' => 1,  // Kantin Biru (penjual_up)
+                'menu_id' => $menu ? $menu->id : null,
+                'menu_name' => $menu ? $menu->nama_makanan : 'Menu Sample',
+                'jumlah' => rand(1, 3),
                 'nomor_antrean' => $queueNumbers[$i],
                 'total_harga' => rand(15000, 35000),
                 'status' => $statuses[$i % count($statuses)],
