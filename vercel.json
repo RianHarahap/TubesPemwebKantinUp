@@ -1,0 +1,23 @@
+{
+    "version": 2,
+    "framework": null,
+    "functions": {
+        "api/index.php": { "runtime": "vercel-php@0.6.0" }
+    },
+    "routes": [
+        {
+            "src": "/(.*)",
+            "dest": "/api/index.php"
+        }
+    ],
+    "env": {
+        "APP_ENV": "production",
+        "APP_DEBUG": "true",
+        "APP_URL": "https://tubes-kantin-up.vercel.app",
+        "APP_KEY": "base64:RbFYadAU0tE2yl2GrpWN1kR4i8amvpbpTjt0HOoa308=",
+        "DB_CONNECTION": "sqlite",
+        "DB_DATABASE": "/tmp/database.sqlite",
+        "ASSET_URL": "/"
+    },
+    "outputDirectory": "public"
+}
