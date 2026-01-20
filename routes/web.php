@@ -66,3 +66,25 @@ Route::middleware(['auth', 'role:penjual'])->prefix('penjual')->name('penjual.')
 Route::middleware(['auth', 'role:admin'])->prefix('api')->group(function () {
     Route::get('/vendor/{vendor}/stats', [App\Http\Controllers\AdminController::class, 'getVendorStats']);
 });
+
+// --- FITUR FORGOT PASSWORD ---
+
+// 1. Halaman Form Minta Link (GET)
+Route::get('/forgot-password', function () {
+    return view('auth.forgot-password');
+})->middleware('guest')->name('password.request');
+
+// 2. Proses Kirim Email Link Reset (POST) - INI YANG TADI ERROR
+Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])
+    ->middleware('guest')
+    ->name('password.email');
+
+// 3. Halaman Form Ketik Password Baru (GET - Dipicu dari link di email)
+Route::get('/reset-password/{token}', function ($token) {
+    return view('auth.reset-password', ['token' => $token]);
+})->middleware('guest')->name('password.reset');
+
+// 4. Proses Update Password Baru ke Database (POST)
+Route::post('/reset-password', [AuthController::class, 'resetPassword'])
+    ->middleware('guest')
+    ->name('password.update');
