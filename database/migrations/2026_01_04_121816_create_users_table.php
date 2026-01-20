@@ -18,7 +18,6 @@ return new class extends Migration
         $table->timestamp('email_verified_at')->nullable();
         $table->string('password');
         
-        // TAMBAHKAN BARIS INI (Persis di bawah password)
         $table->enum('role', ['admin', 'penjual', 'user'])->default('user');
         
         $table->rememberToken();

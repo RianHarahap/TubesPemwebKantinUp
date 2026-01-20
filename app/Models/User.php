@@ -15,7 +15,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role', // PASTIKAN ADA INI
+        'role',
         'balance',
         'vendor_id',
         ];
