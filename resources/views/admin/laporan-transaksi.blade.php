@@ -226,6 +226,7 @@
             top: 0;
             width: 100%;
             height: 100%;
+            overflow-y: auto; /* Enable scroll if content is long */
             background-color: rgba(0,0,0,0.5);
             animation: fadeIn 0.3s;
         }
@@ -584,25 +585,17 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         const ctx = document.getElementById('monthlySalesChart').getContext('2d');
-        const labels = {!! json_encode($monthlySales->pluck('month')) !!};
-        const data = {!! json_encode($monthlySales->pluck('total')) !!};
-
+        
         new Chart(ctx, {
-            type: 'line',
+            type: 'bar',
             data: {
-                labels: labels,
+                labels: {!! json_encode($monthlySales->map(function($item) { return $item->month . '/' . substr($item->year, -2); })) !!},
                 datasets: [{
-                    label: 'Penjualan (Rp)',
-                    data: data,
-                    borderColor: 'rgba(30, 60, 114, 1)',
-                    backgroundColor: 'rgba(30, 60, 114, 0.1)',
-                    borderWidth: 3,
-                    fill: true,
-                    tension: 0.4,
-                    pointBackgroundColor: 'rgba(30, 60, 114, 1)',
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2,
-                    pointRadius: 6
+                    label: 'Penjualan Bulanan (Rp)',
+                    data: {!! json_encode($monthlySales->pluck('total')) !!},
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
                 }]
             },
             options: {
@@ -617,87 +610,15 @@
                 scales: {
                     y: {
                         beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return 'Rp ' + new Intl.NumberFormat('id-ID').format(value);
+                            }
+                        },
                         grid: { color: '#f0f0f0' }
                     },
                     x: {
                         grid: { display: false }
-                    }
-                }
-            }
-        });
-    </script>
-</body>
-</html>
-
-    <div class="main-content">
-        <div class="header">
-            <h2 style="margin:0">Laporan Transaksi</h2>
-        </div>
-
-        <div class="chart-container">
-            <h4>Grafik Penjualan Bulanan</h4>
-            <canvas id="monthlySalesChart" width="400" height="200"></canvas>
-        </div>
-
-        <div class="table-container">
-            <h4>Daftar Transaksi</h4>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Pembeli</th>
-                        <th>Vendor</th>
-                        <th>Total</th>
-                        <th>Status</th>
-                        <th>Tanggal</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($transactions as $transaction)
-                    <tr>
-                        <td>{{ $transaction->id }}</td>
-                        <td>{{ $transaction->user->name }}</td>
-                        <td>{{ $transaction->vendor->nama_kantin }}</td>
-                        <td>Rp {{ number_format($transaction->total_harga, 0, ',', '.') }}</td>
-                        <td>
-                            <span class="status-badge status-{{ $transaction->status }}">
-                                {{ ucfirst($transaction->status) }}
-                            </span>
-                        </td>
-                        <td>{{ $transaction->created_at->format('d/m/Y H:i') }}</td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-            {{ $transactions->links() }}
-        </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        const monthlyCtx = document.getElementById('monthlySalesChart').getContext('2d');
-        new Chart(monthlyCtx, {
-            type: 'bar',
-            data: {
-                labels: @json($monthlySales->map(function($item) { return $item->month . '/' . substr($item->year, -2); })),
-                datasets: [{
-                    label: 'Penjualan Bulanan (Rp)',
-                    data: @json($monthlySales->pluck('total')),
-                    backgroundColor: 'rgba(255, 99, 132, 0.5)',
-                    borderColor: 'rgba(255, 99, 132, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return 'Rp ' + value.toLocaleString('id-ID');
-                            }
-                        }
                     }
                 }
             }
@@ -724,11 +645,17 @@
             statusBadgeEl.className = 'status-badge status-' + status;
             
             document.getElementById('orderDate').textContent = orderDate;
+            
+            // Prevent body scroll
+            document.body.style.overflow = 'hidden';
+            
             document.getElementById('detailModal').style.display = 'block';
         }
 
         function closeDetailModal() {
             document.getElementById('detailModal').style.display = 'none';
+            // Restore body scroll
+            document.body.style.overflow = 'auto';
         }
 
         function ucfirstStatus(str) {
@@ -739,7 +666,7 @@
         window.onclick = function(event) {
             const modal = document.getElementById('detailModal');
             if (event.target == modal) {
-                modal.style.display = 'none';
+                closeDetailModal();
             }
         }
     </script>
