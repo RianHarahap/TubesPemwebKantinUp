@@ -129,15 +129,15 @@ class AdminController extends Controller
 
         // Data untuk grafik bulanan
         $monthlySales = Order::select(
-            DB::raw("strftime('%m', created_at) as month"),
-            DB::raw("strftime('%Y', created_at) as year"),
-            DB::raw('SUM(total_harga) as total')
-        )
-        ->where('status', 'selesai')
-        ->groupBy('month', 'year')
-        ->orderBy('year')
-        ->orderBy('month')
-        ->get();
+        DB::raw("MONTH(created_at) as month"), // Sebelumnya strftime('%m', ...)
+        DB::raw("YEAR(created_at) as year"),  // Sebelumnya strftime('%Y', ...)
+        DB::raw('SUM(total_harga) as total')
+    )
+    ->where('status', 'selesai')
+    ->groupBy('month', 'year')
+    ->orderBy('year')
+    ->orderBy('month')
+    ->get();
 
         return view('admin.laporan-transaksi', compact('transactions', 'monthlySales'));
     }
