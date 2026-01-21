@@ -116,9 +116,9 @@
         <!-- Gunakan div pembungkus untuk menu navigasi -->
         <div class="sidebar-nav">
             <a href="{{ route('user.dashboard') }}" class="menu-item active"><i class="fa fa-home"></i> Beranda</a>
+            <a href="{{ route('user.cart') }}" class="menu-item"><i class="fa fa-shopping-cart"></i> Keranjang</a>
             <a href="{{ route('user.favorit') }}" class="menu-item"><i class="fa fa-utensils"></i> Kantin Favorit</a>
             <a href="{{ route('user.history') }}" class="menu-item"><i class="fa fa-history"></i> Riwayat Pesanan</a>
-            <a href="{{ route('user.wallet') }}" class="menu-item"><i class="fa fa-wallet"></i> Digital Wallet</a>
         </div>
 
         <!-- Bagian Logout akan selalu di paling bawah karena flex-grow di atasnya -->
@@ -136,12 +136,6 @@
         <div class="header">
             <h2>Kantin Mahasiswa</h2>
             <div class="user-profile" style="gap: 20px;">
-                <!-- Bagian Saldo -->
-                <div style="text-align: right; border-right: 1px solid #ddd; padding-right: 15px;">
-                    <small style="color: #777; display: block; font-size: 10px;">SALDO SIUP PAY</small>
-                    <span style="color: #28a745; font-weight: 600;">Rp {{ number_format(Auth::user()->balance, 0, ',', '.') }}</span>
-                </div>
-    
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <i class="fa fa-circle-user fa-lg"></i>
                     <span>{{ Auth::user()->name }}</span>
@@ -235,6 +229,7 @@
         </div>
     </div>
 
+
     <!-- Modal Pemesanan (Copied from detail_kantin) -->
     <div id="orderModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000;">
         <div class="modal-content" style="background: white; padding: 25px; border-radius: 10px; width: 90%; max-width: 450px;">
@@ -246,7 +241,7 @@
                     <p id="modalMenuPrice" style="color: var(--primary); font-weight: bold; margin: 0; font-size: 18px;">Rp 0</p>
                 </div>
                 
-                <form action="{{ route('user.pesan') }}" method="POST" id="orderForm">
+                <form action="{{ route('user.cart.add') }}" method="POST" id="orderForm">
                     @csrf
                     <input type="hidden" name="menu_id" id="modalMenuId">
                     
@@ -266,29 +261,11 @@
 
                     <div style="display: flex; gap: 10px;">
                         <button type="button" onclick="closeModal()" style="flex: 1; padding: 12px; background: #eee; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Batal</button>
-                        <button type="button" onclick="showQris()" style="flex: 1; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
-                            <i class="fa fa-qrcode"></i> Bayar & Pesan
+                        <button type="submit" style="flex: 1; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                            <i class="fa fa-cart-plus"></i> Masuk Keranjang
                         </button>
                     </div>
                 </form>
-            </div>
-
-            <!-- Step 2: QRIS -->
-            <div id="stepQris" style="display: none; text-align: center;">
-                <h3 style="margin-top: 0;">Scan QRIS untuk Bayar</h3>
-                <p style="color: #666; font-size: 13px;">Silakan scan QR Code di bawah ini menggunakan aplikasi e-wallet Anda.</p>
-                
-                <div style="background: white; padding: 20px; border: 2px dashed #ddd; border-radius: 15px; display: inline-block; margin: 10px 0;">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/d/d0/QR_code_for_mobile_English_Wikipedia.svg" alt="QRIS" style="width: 200px; height: 200px;">
-                    <p style="margin: 10px 0 0 0; font-weight: bold;">SIUP PAY</p>
-                </div>
-
-                <p id="qrisTotal" style="font-size: 20px; font-weight: bold; color: var(--primary); margin: 10px 0;">Rp 0</p>
-
-                <button type="button" onclick="submitOrder()" style="width: 100%; padding: 14px; background: #28a745; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 16px;">
-                    <i class="fa fa-check-circle"></i> Saya Sudah Bayar
-                </button>
-                <button type="button" onclick="backToOrder()" style="margin-top: 10px; background: none; border: none; color: #888; cursor: pointer; text-decoration: underline;">Kembali ke pesanan</button>
             </div>
         </div>
     </div>
@@ -298,9 +275,6 @@
 
         function openModal(id, name, price) {
             document.getElementById('orderModal').style.display = 'flex';
-            document.getElementById('stepOrder').style.display = 'block';
-            document.getElementById('stepQris').style.display = 'none';
-            
             document.getElementById('modalMenuId').value = id;
             document.getElementById('modalMenuName').innerText = name;
             document.getElementById('modalMenuPrice').innerText = formatRupiah(price);
@@ -327,24 +301,6 @@
             const qty = parseInt(document.getElementById('qtyInput').value);
             const total = qty * currentPrice;
             document.getElementById('grandTotal').innerText = formatRupiah(total);
-            document.getElementById('qrisTotal').innerText = formatRupiah(total);
-        }
-
-        function showQris() {
-            document.getElementById('stepOrder').style.display = 'none';
-            document.getElementById('stepQris').style.display = 'block';
-        }
-
-        function backToOrder() {
-            document.getElementById('stepOrder').style.display = 'block';
-            document.getElementById('stepQris').style.display = 'none';
-        }
-
-        function submitOrder() {
-            const btn = event.target;
-            btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Memproses...';
-            btn.disabled = true;
-            setTimeout(() => { document.getElementById('orderForm').submit(); }, 1500);
         }
 
         function formatRupiah(num) {

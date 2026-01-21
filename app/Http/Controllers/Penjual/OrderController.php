@@ -32,9 +32,18 @@ class OrderController extends Controller
         // Ambil semua order untuk vendor ini, diurutkan dari terbaru
         $orders = Order::where('vendor_id', $vendorId)
                     ->orderBy('created_at', 'desc')
-                    ->paginate(20);
+                    ->get();
 
-        return view('penjual.orders.index', compact('orders'));
+        // Grouping berdasarkan order_group_id atau id (jika single)
+        // Kuncinya: order_group_id agar menu yang dibeli bersamaan jadi satu
+        $groupedOrders = $orders->groupBy(function($item) {
+             return $item->order_group_id ?? 'SINGLE-'.$item->id;
+        });
+
+        // Pagination manual jika diperlukan (Collection Pagination)
+        // Untuk sederhananya kita kirim collection groups
+        
+        return view('penjual.orders.index', compact('groupedOrders'));
     }
 
     // Tampilkan detail pesanan
@@ -51,7 +60,20 @@ class OrderController extends Controller
             abort(403, 'Anda tidak berhak mengakses pesanan ini');
         }
 
-        return view('penjual.orders.show', compact('order'));
+        // Ambil teman-teman satu grup order (jika ada) yang juga milik vendor ini
+        // Jika order_group_id null, maka hanya dia sendiri
+        $groupItems = collect([$order]);
+
+        if ($order->order_group_id) {
+            $groupItems = Order::where('order_group_id', $order->order_group_id)
+                               ->where('vendor_id', $vendorId)
+                               ->get();
+        }
+
+        // Hitung total harga untuk item-item yang masuk ke vendor ini saja
+        $totalVendorPrice = $groupItems->sum('total_harga');
+
+        return view('penjual.orders.show', compact('order', 'groupItems', 'totalVendorPrice'));
     }
 
     // Update status pesanan

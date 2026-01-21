@@ -89,10 +89,4 @@
             </div>
         @endforelse
     </div>
-
-    @if(method_exists($menus ?? null, 'links'))
-        <div style="margin-top:30px">
-            {{ $menus->links() }}
-        </div>
-    @endif
 @endsection

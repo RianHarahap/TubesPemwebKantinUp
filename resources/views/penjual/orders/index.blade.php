@@ -47,79 +47,98 @@
     @endif
 
     <div class="order-table">
-        @forelse($orders ?? [] as $order)
-            @if($loop->first)
-                <table>
-                    <thead>
-                        <tr>
-                            <th>No. Antrean</th>
-                            <th>Pembeli</th>
-                            <th>Total Harga</th>
-                            <th>Estimasi (menit)</th>
-                            <th>Status Saat Ini</th>
-                            <th>Ubah Status</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            @endif
-                        <tr>
-                            <td><span class="order-nomor">{{ $order->nomor_antrean }}</span></td>
-                            <td>
-                                <span class="order-user">
-                                    {{ $order->user->name ?? 'Guest' }}
-                                    <small>{{ $order->created_at->format('d M Y H:i') }}</small>
-                                </span>
-                            </td>
-                            <td><span class="price-highlight">Rp {{ number_format($order->total_harga, 0, ',', '.') }}</span></td>
-                            <td><strong>{{ $order->estimasi_menit }} menit</strong></td>
-                            <td>
-                                <span class="status-badge status-{{ $order->status }}">
-                                    <i class="fa {{ match($order->status) {
-                                        'menunggu' => 'fa-clock',
-                                        'dimasak' => 'fa-fire',
-                                        'siap' => 'fa-check-circle',
-                                        'selesai' => 'fa-thumbs-up',
-                                        'dibatalkan' => 'fa-ban',
-                                        default => 'fa-info-circle'
-                                    } }}"></i>
-                                    {{ $order->getStatusLabel() }}
-                                </span>
-                            </td>
-                            <td>
-                                <form action="{{ route('penjual.orders.updateStatus', $order->id) }}" method="POST" style="display: inline;">
-                                    @csrf
-                                    <select name="status" class="status-dropdown" onchange="this.form.submit()">
-                                        <option value="">Pilih Status</option>
-                                        <option value="menunggu" {{ $order->status == 'menunggu' ? 'selected' : '' }}>Menunggu</option>
-                                        <option value="dimasak" {{ $order->status == 'dimasak' ? 'selected' : '' }}>Sedang Dimasak</option>
-                                        <option value="siap" {{ $order->status == 'siap' ? 'selected' : '' }}>Siap Diambil</option>
-                                        <option value="selesai" {{ $order->status == 'selesai' ? 'selected' : '' }}>Selesai</option>
-                                        <option value="dibatalkan" {{ $order->status == 'dibatalkan' ? 'selected' : '' }}>Dibatalkan</option>
-                                    </select>
-                                </form>
-                            </td>
-                            <td>
-                                <a href="{{ route('penjual.orders.show', $order->id) }}" class="action-btn">
-                                    <i class="fa fa-eye"></i> Lihat
-                                </a>
-                            </td>
-                        </tr>
-            @if($loop->last)
-                    </tbody>
-                </table>
-            @endif
-        @empty
+        @if(empty($groupedOrders) || $groupedOrders->isEmpty())
             <div class="empty-state">
                 <div class="empty-state-icon"><i class="fa fa-inbox"></i></div>
                 <div class="empty-state-text">Belum ada pesanan yang masuk</div>
             </div>
-        @endforelse
-    </div>
+        @else
+            <table style="width: 100%; border-collapse: separate; border-spacing: 0;">
+                <thead>
+                    <tr>
+                        <th style="width: 15%;">Antrean</th>
+                        <th style="width: 15%;">Pembeli</th>
+                        <th style="width: 50%;">Menu & Status</th>
+                        <th style="width: 10%;">Total</th>
+                        <th style="width: 10%;">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($groupedOrders as $groupKey => $items)
+                        @php
+                            $first = $items->first();
+                            $isMulti = $items->count() > 1;
+                            $totalGroup = $items->sum('total_harga');
+                        @endphp
+                        <tr style="border-bottom: 5px solid #f8f9fa;">
+                            <!-- Kolom 1: Info Antrean -->
+                            <td style="vertical-align: top; padding: 15px; border-bottom: 1px solid #eee;">
+                                <div style="font-weight: 700; font-size: 16px; color: #0047ba;">{{ $first->nomor_antrean ?? '-' }}</div>
+                                <div style="font-size: 11px; color: #888; margin-top: 4px;">{{ $first->created_at->format('d/m H:i') }}</div>
+                                
+                                @if($first->payment_status == 'paid')
+                                    <div style="margin-top: 8px;"><span style="padding: 3px 8px; background: #e8f5e9; color: #2e7d32; border-radius: 12px; font-size: 11px; font-weight: 600;">Lunas</span></div>
+                                @elseif($first->payment_status == 'pending')
+                                    <div style="margin-top: 8px;"><span style="padding: 3px 8px; background: #fff3cd; color: #856404; border-radius: 12px; font-size: 11px; font-weight: 600;">Belum Lunas</span></div>
+                                @elseif($first->payment_status == 'expired')
+                                    <div style="margin-top: 8px;"><span style="padding: 3px 8px; background: #ffebee; color: #c62828; border-radius: 12px; font-size: 11px; font-weight: 600;">Expired</span></div>
+                                @endif
+                            </td>
 
-    @if(method_exists($orders ?? null, 'links'))
-        <div style="margin-top: 20px; display: flex; justify-content: center;">
-            {{ $orders->links() }}
-        </div>
-    @endif
+                            <!-- Kolom 2: Pembeli -->
+                            <td style="vertical-align: top; padding: 15px; border-bottom: 1px solid #eee;">
+                                <div style="font-weight: 500;">{{ $first->nama_pembeli ?? ($first->user->name ?? 'Guest') }}</div>
+                                @if($isMulti)
+                                    <div style="margin-top: 5px; font-size: 11px; color: #666; background: #f0f0f0; display: inline-block; padding: 2px 6px; border-radius: 4px;">{{ $items->count() }} Item</div>
+                                @endif
+                            </td>
+
+                            <!-- Kolom 3: Rincian Menu & Status (Layout Grid Rapi) -->
+                            <td style="vertical-align: top; padding: 10px; border-bottom: 1px solid #eee;">
+                                <div style="display: flex; flex-direction: column; gap: 8px;">
+                                    @foreach($items as $item)
+                                        <div style="display: flex; align-items: center; justify-content: space-between; background: #fdfdfd; padding: 8px 10px; border: 1px solid #f0f0f0; border-radius: 8px;">
+                                            <div style="flex: 1;">
+                                                <div style="font-weight: 600; font-size: 13px;">{{ $item->menu_name }}</div>
+                                                <div style="font-size: 11px; color: #666; margin-top: 2px;">{{ $item->jumlah }} x Rp {{ number_format($item->harga_satuan, 0, ',', '.') }}</div>
+                                            </div>
+                                            
+                                            <!-- Status Control -->
+                                            <form action="{{ route('penjual.orders.updateStatus', $item->id) }}" method="POST" style="margin-left: 15px;">
+                                                @csrf
+                                                <select name="status" onchange="this.form.submit()" 
+                                                    style="padding: 5px 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 11px; cursor: pointer; outline: none; 
+                                                    background-color: {{ $item->status == 'menunggu' ? '#fff3cd' : ($item->status == 'dimasak' ? '#e3f2fd' : ($item->status == 'selesai' ? '#e8f5e9' : '#fff')) }};
+                                                    color: {{ $item->status == 'menunggu' ? '#856404' : ($item->status == 'dimasak' ? '#0d47a1' : ($item->status == 'selesai' ? '#1b5e20' : '#333')) }};
+                                                    border-color: {{ $item->status == 'menunggu' ? '#ffeeba' : ($item->status == 'dimasak' ? '#bbdefb' : ($item->status == 'selesai' ? '#c8e6c9' : '#ddd')) }};">
+                                                    
+                                                    <option value="menunggu" {{ $item->status == 'menunggu' ? 'selected' : '' }}>⏳ Menunggu</option>
+                                                    <option value="dimasak" {{ $item->status == 'dimasak' ? 'selected' : '' }}>🔥 Dimasak</option>
+                                                    <option value="siap" {{ $item->status == 'siap' ? 'selected' : '' }}>✅ Siap</option>
+                                                    <option value="selesai" {{ $item->status == 'selesai' ? 'selected' : '' }}>🎉 Selesai</option>
+                                                    <option value="dibatalkan" {{ $item->status == 'dibatalkan' ? 'selected' : '' }}>❌ Batal</option>
+                                                </select>
+                                            </form>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </td>
+
+                            <!-- Kolom 4: Total Group -->
+                            <td style="vertical-align: top; padding: 15px; border-bottom: 1px solid #eee;">
+                                <div style="font-weight: 700; color: #0047ba;">Rp {{ number_format($totalGroup, 0, ',', '.') }}</div>
+                            </td>
+
+                            <!-- Kolom 5: Aksi -->
+                            <td style="vertical-align: top; padding: 15px; border-bottom: 1px solid #eee;">
+                                <a href="{{ route('penjual.orders.show', $first->id) }}" class="action-btn" style="text-decoration:none;">
+                                    <i class="fa fa-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        @endif
+    </div>
 @endsection

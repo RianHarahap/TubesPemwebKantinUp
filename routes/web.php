@@ -21,13 +21,24 @@ Route::middleware(['auth', 'role:user'])->group(function () {
     Route::get('/user/favorit', [UserController::class, 'favorit'])->name('user.favorit');
     Route::post('/user/toggle-favorite', [UserController::class, 'toggleFavorite'])->name('user.toggle-favorite');
 
+    // Route Cart (Keranjang)
+    Route::get('/user/cart', [App\Http\Controllers\CartController::class, 'index'])->name('user.cart');
+    Route::post('/user/cart/add', [App\Http\Controllers\CartController::class, 'addToCart'])->name('user.cart.add');
+    Route::post('/user/cart/update/{id}', [App\Http\Controllers\CartController::class, 'updateCart'])->name('user.cart.update');
+    Route::get('/user/cart/remove/{id}', [App\Http\Controllers\CartController::class, 'removeFromCart'])->name('user.cart.remove');
+    Route::post('/user/cart/checkout', [App\Http\Controllers\CartController::class, 'checkout'])->name('user.cart.checkout');
+
+    // Route Transaksi (Multi Order Payment)
+    Route::get('/user/transaction/{id}', [App\Http\Controllers\CartController::class, 'showTransaction'])->name('user.transaction');
+    Route::post('/user/transaction/{id}/confirm', [App\Http\Controllers\CartController::class, 'confirmTransaction'])->name('user.transaction.confirm');
+
     // Route Pesanan
     Route::get('/user/riwayat', [App\Http\Controllers\KantinController::class, 'pesanan'])->name('user.history');
     Route::post('/user/pesan', [App\Http\Controllers\KantinController::class, 'pesan'])->name('user.pesan'); 
     
-    // Fitur Wallet
-    Route::get('/user/wallet', [UserController::class, 'wallet'])->name('user.wallet');
-    Route::post('/user/top-up', [UserController::class, 'topUp'])->name('user.top-up');
+    // Route Pembayaran QRIS (Legacy Single Order) - Masih disimpan jika perlu
+    Route::get('/user/payment-qris/{order}', [App\Http\Controllers\KantinController::class, 'showPaymentQris'])->name('user.payment-qris');
+    Route::post('/user/payment-qris/{order}/confirm', [App\Http\Controllers\KantinController::class, 'confirmPayment'])->name('user.confirm-payment');
 });
 
 // --- GROUP ADMIN ---

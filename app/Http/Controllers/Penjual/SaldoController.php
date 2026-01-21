@@ -30,7 +30,7 @@ class SaldoController extends Controller
         $riwayatPesanan = Order::where('vendor_id', $vendorId)
                                ->where('status', 'selesai')
                                ->orderBy('updated_at', 'desc')
-                               ->paginate(10);
+                               ->get();
 
         // Statistik Pendapatan
         $pendapatanHariIni = Order::where('vendor_id', $vendorId)

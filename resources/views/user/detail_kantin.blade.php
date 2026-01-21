@@ -180,7 +180,7 @@
                 <p id="modalMenuPrice" style="color: var(--primary); font-weight: bold; margin: 0; font-size: 18px;">Rp 0</p>
             </div>
             
-            <form action="{{ route('user.pesan') }}" method="POST" id="orderForm">
+            <form action="{{ route('user.cart.add') }}" method="POST" id="orderForm">
                 @csrf
                 <input type="hidden" name="menu_id" id="modalMenuId">
                 
@@ -200,21 +200,21 @@
 
                 <div style="display: flex; gap: 10px;">
                     <button type="button" onclick="closeModal()" style="flex: 1; padding: 12px; background: #eee; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Batal</button>
-                    <button type="button" onclick="showQris()" style="flex: 1; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
-                        <i class="fa fa-qrcode"></i> Bayar & Pesan
+                    <button type="submit" style="flex: 1; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                        <i class="fa fa-cart-plus"></i> Masuk Keranjang
                     </button>
                 </div>
             </form>
         </div>
-
-        <!-- Step 2: QRIS -->
+    </div>
+</div>
         <div id="stepQris" style="display: none; text-align: center;">
             <h3 style="margin-top: 0;">Scan QRIS untuk Bayar</h3>
             <p style="color: #666; font-size: 13px;">Silakan scan QR Code di bawah ini menggunakan aplikasi e-wallet Anda.</p>
             
             <div style="background: white; padding: 20px; border: 2px dashed #ddd; border-radius: 15px; display: inline-block; margin: 10px 0;">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/d/d0/QR_code_for_mobile_English_Wikipedia.svg" alt="QRIS" style="width: 200px; height: 200px;">
-                <p style="margin: 10px 0 0 0; font-weight: bold;">SIUP PAY</p>
+                <p style="margin: 10px 0 0 0; font-weight: bold;">SCAN QRIS</p>
             </div>
 
             <p id="qrisTotal" style="font-size: 20px; font-weight: bold; color: var(--primary); margin: 10px 0;">Rp 0</p>
@@ -232,9 +232,6 @@
 
     function openModal(id, name, price) {
         document.getElementById('orderModal').style.display = 'flex';
-        document.getElementById('stepOrder').style.display = 'block';
-        document.getElementById('stepQris').style.display = 'none';
-        
         document.getElementById('modalMenuId').value = id;
         document.getElementById('modalMenuName').innerText = name;
         document.getElementById('modalMenuPrice').innerText = formatRupiah(price);
@@ -261,29 +258,6 @@
         const qty = parseInt(document.getElementById('qtyInput').value);
         const total = qty * currentPrice;
         document.getElementById('grandTotal').innerText = formatRupiah(total);
-        document.getElementById('qrisTotal').innerText = formatRupiah(total);
-    }
-
-    function showQris() {
-        document.getElementById('stepOrder').style.display = 'none';
-        document.getElementById('stepQris').style.display = 'block';
-    }
-
-    function backToOrder() {
-        document.getElementById('stepOrder').style.display = 'block';
-        document.getElementById('stepQris').style.display = 'none';
-    }
-
-    function submitOrder() {
-        // Simulasi loading
-        const btn = event.target;
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Memproses...';
-        btn.disabled = true;
-
-        setTimeout(() => {
-            document.getElementById('orderForm').submit();
-        }, 1500);
     }
 
     function formatRupiah(num) {

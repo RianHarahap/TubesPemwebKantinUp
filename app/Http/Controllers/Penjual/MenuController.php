@@ -29,7 +29,7 @@ class MenuController extends Controller
             return back()->withErrors(['vendor' => 'Akun penjual belum terhubung dengan vendor.']);
         }
 
-        $menus = Menu::where('vendor_id', $vendorId)->paginate(15);
+        $menus = Menu::where('vendor_id', $vendorId)->get();
         return view('penjual.menus.index', compact('menus'));
     }
 

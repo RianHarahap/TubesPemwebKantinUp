@@ -138,7 +138,7 @@ class AdminController extends Controller
         // Data transaksi untuk tabel
         $transactions = Order::with(['user', 'vendor'])
                         ->orderBy('created_at', 'desc')
-                        ->paginate(20);
+                        ->get();
 
         // --- LOGIKA PENDETEKSI DATABASE (AGAR BISA JALAN DI MYSQL & SQLITE) ---
         $driver = DB::connection()->getDriverName();

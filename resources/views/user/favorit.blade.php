@@ -45,9 +45,9 @@
         </div>
         <div class="sidebar-nav">
             <a href="{{ route('user.dashboard') }}" class="menu-item"><i class="fa fa-home"></i> Beranda</a>
+            <a href="{{ route('user.cart') }}" class="menu-item"><i class="fa fa-shopping-cart"></i> Keranjang</a>
             <a href="{{ route('user.favorit') }}" class="menu-item active"><i class="fa fa-utensils"></i> Kantin Favorit</a>
             <a href="{{ route('user.history') }}" class="menu-item"><i class="fa fa-history"></i> Riwayat Pesanan</a>
-            <a href="{{ route('user.wallet') }}" class="menu-item"><i class="fa fa-wallet"></i> Digital Wallet</a>
         </div>
 
         <div class="logout-section">

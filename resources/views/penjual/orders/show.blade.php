@@ -42,7 +42,7 @@
         <div class="detail-grid">
             <div class="detail-box">
                 <div class="detail-label"><i class="fa fa-user" style="margin-right:8px; color:#0047ba"></i>Nama Pembeli</div>
-                <div class="detail-value">{{ $order->user->name ?? 'Guest' }}</div>
+                <div class="detail-value">{{ $order->user->name ?? ($order->nama_pembeli ?? 'Guest') }}</div>
             </div>
             <div class="detail-box">
                 <div class="detail-label"><i class="fa fa-clock" style="margin-right:8px; color:#0047ba"></i>Waktu Pesan</div>
@@ -53,41 +53,53 @@
                 <div class="detail-value">{{ $order->estimasi_menit }} menit</div>
             </div>
             <div class="detail-box">
-                <div class="detail-label"><i class="fa fa-info-circle" style="margin-right:8px; color:#0047ba"></i>Status Saat Ini</div>
+                <div class="detail-label"><i class="fa fa-wallet" style="margin-right:8px; color:#0047ba"></i>Status Pembayaran</div>
                 <div class="detail-value">
-                    <span class="status-large status-{{ $order->status }}">
-                        {{ $order->getStatusLabel() }}
-                    </span>
+                     @if($order->payment_status == 'paid')
+                        <span style="color:#28a745"><i class="fa fa-check-circle"></i> Lunas</span>
+                     @elseif($order->payment_status == 'expired')
+                         <span style="color:#dc3545"><i class="fa fa-times-circle"></i> Kadaluarsa</span>
+                     @else
+                        <span style="color:#f39c12"><i class="fa fa-clock"></i> Belum Lunas</span>
+                     @endif
                 </div>
             </div>
         </div>
 
         <div style="background: #e7f3ff; border-left: 4px solid #0047ba; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
             <div style="font-size: 14px; color: #0047ba; font-weight: 600;">
-                <i class="fa fa-shopping-cart" style="margin-right:8px"></i>Total Pesanan
+                <i class="fa fa-cash-register" style="margin-right:8px"></i>Total Pendapatan (Pesanan Ini)
             </div>
             <div style="font-size: 32px; font-weight: 700; color: #0047ba; margin-top: 10px;">
-                Rp {{ number_format($order->total_harga, 0, ',', '.') }}
+                Rp {{ number_format($totalVendorPrice, 0, ',', '.') }}
             </div>
         </div>
 
-        <h3 class="section-title"><i class="fa fa-list" style="margin-right:10px"></i>Detail Menu</h3>
+        <h3 class="section-title"><i class="fa fa-list" style="margin-right:10px"></i>Rincian Menu Dipesan</h3>
         
-        @if($order->menu)
-            <div class="menu-items">
+        <div class="menu-items">
+            @foreach($groupItems as $item)
                 <div class="menu-item">
                     <div style="flex: 1;">
-                        <div class="menu-name">{{ $order->menu->nama_makanan ?? '-' }}</div>
-                        <small style="color: #888;">Dari: {{ $order->menu->vendor?->nama_kantin ?? '-' }}</small>
+                        <div class="menu-name" style="font-size: 16px;">
+                            {{ $item->menu_name ?? ($item->menu->nama_makanan ?? '-') }}
+                            <span style="color:#666; font-size:14px; font-weight:normal;"> (x{{ $item->jumlah }})</span>
+                        </div>
+                        <div style="margin-top:5px; font-size:13px; color:#555">
+                            Status: <span class="status-badge status-{{ $item->status }}" style="padding:2px 8px; font-size:11px;">{{ $item->getStatusLabel() }}</span>
+                        </div>
                     </div>
-                    <div class="menu-price">Rp {{ number_format($order->menu->harga, 0, ',', '.') }}</div>
+                    <div class="menu-price">Rp {{ number_format($item->total_harga, 0, ',', '.') }}</div>
                 </div>
-            </div>
-        @else
-            <div style="color: #999; padding: 20px; text-align: center;">Data menu tidak tersedia</div>
-        @endif
+            @endforeach
+        </div>
+        
+        <div style="margin-top: 30px; padding: 20px; background: #fff3cd; border: 1px solid #ffeeba; border-radius: 8px;">
+            <i class="fa fa-info-circle"></i> <strong>Catatan:</strong> Status pesanan dapat diubah secara individual per item di halaman utama "Pesanan Masuk".
+        </div>
 
-        <h3 class="section-title"><i class="fa fa-pencil-alt" style="margin-right:10px"></i>Ubah Status Pesanan</h3>
+        <!-- Hapus bagian form update status single di detail view karena sekarang multi-item
+             Atau biarkan jika ingin mengubah item UTAMA yang sedang dilihat -->
 
         <form action="{{ route('penjual.orders.updateStatus', $order->id) }}" method="POST">
             @csrf

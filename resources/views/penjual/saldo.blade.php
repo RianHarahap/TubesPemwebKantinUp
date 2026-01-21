@@ -151,11 +151,6 @@
                     @endforeach
                 </tbody>
             </table>
-
-            <!-- Pagination -->
-            <div style="padding: 0 16px;">
-                {{ $riwayatPesanan->links() }}
-            </div>
         @else
             <div class="empty-state">
                 <i class="fa fa-inbox fa-2x"></i>

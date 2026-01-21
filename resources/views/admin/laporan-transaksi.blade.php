@@ -429,7 +429,7 @@
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-label">Total Transaksi</div>
-                <div class="stat-value">{{ $transactions->total() }}</div>
+                <div class="stat-value">{{ $transactions->count() }}</div>
             </div>
             <div class="stat-card">
                 <div class="stat-label">Total Revenue</div>
@@ -445,7 +445,7 @@
         <div class="table-container">
             <div class="table-header">
                 <h3>Daftar Transaksi</h3>
-                <input type="text" class="search-box" placeholder="Cari vendor atau pembeli...">
+                <input type="text" id="tableSearch" class="search-box" placeholder="Cari vendor atau pembeli...">
             </div>
 
             <div style="overflow-x: auto;">
@@ -499,12 +499,7 @@
                     </tbody>
                 </table>
             </div>
-
-            @if($transactions->hasPages())
-                <div class="pagination">
-                    {{ $transactions->links() }}
-                </div>
-            @endif
+            
         </div>
     </div>
 
@@ -669,6 +664,21 @@
                 closeDetailModal();
             }
         }
+
+        // Simple Client-Side Search
+        document.getElementById('tableSearch').addEventListener('keyup', function() {
+            let filter = this.value.toLowerCase();
+            let rows = document.querySelectorAll('.table tbody tr');
+
+            rows.forEach(row => {
+                let text = row.innerText.toLowerCase();
+                if (text.includes(filter)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
     </script>
 </body>
 </html>

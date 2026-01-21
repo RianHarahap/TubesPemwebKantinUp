@@ -72,29 +72,4 @@ class UserController extends Controller
             return back()->with('success', 'Ditambahkan ke favorit.');
         }
     }
-
-    public function wallet()
-    {
-        $user = Auth::user();
-        // History transaksi (topup manual vs pembelian)
-        // Kita gunakan data orders sebagai pengeluaran
-        $expenses = Order::where('user_id', $user->id)
-                         ->orderBy('created_at', 'desc')
-                         ->get();
-
-        return view('user.wallet', compact('user', 'expenses'));
-    }
-
-    public function topUp(Request $request)
-    {
-        $request->validate(['amount' => 'required|integer|min:10000']);
-        
-        $user = Auth::user();
-        $user->balance += $request->amount;
-        $user->save();
-
-        ActivityLog::log('top_up', "User melakukan Top Up sebesar Rp " . number_format($request->amount));
-
-        return back()->with('success', 'Top Up berhasil! Saldo bertambah.');
-    }
 }
