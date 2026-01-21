@@ -78,9 +78,22 @@
         @else
             <div class="canteen-grid">
                 @foreach($favorites as $fav)
-                    @php $v = $fav->vendor; @endphp
+                    @php 
+                        $v = $fav->vendor; 
+                        
+                        $filename = \Illuminate\Support\Str::slug($v->nama_kantin) . '.jpg';
+                        $manualPath = 'img/' . $filename;
+                        
+                        if($v->foto) {
+                            $bgImage = asset('storage/' . $v->foto);
+                        } elseif(file_exists(public_path($manualPath))) {
+                            $bgImage = asset($manualPath);
+                        } else {
+                            $bgImage = 'https://loremflickr.com/400/200/restaurant,kitchen?lock=' . $v->id;
+                        }
+                    @endphp
                     <div class="canteen-card" onclick="location.href='{{ route('user.kantin', $v->id) }}'">
-                        <div class="canteen-img" style="background-image: url('https://loremflickr.com/400/200/restaurant,kitchen?lock={{ $v->id }}')"></div>
+                        <div class="canteen-img" style="background-image: url('{{ $bgImage }}')"></div>
                         
                         <!-- Tombol Hapus Favorit -->
                         <form action="{{ route('user.toggle-favorite') }}" method="POST" onclick="event.stopPropagation();">
