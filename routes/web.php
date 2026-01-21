@@ -99,3 +99,11 @@ Route::get('/reset-password/{token}', function ($token) {
 Route::post('/reset-password', [AuthController::class, 'resetPassword'])
     ->middleware('guest')
     ->name('password.update');
+
+// --- FALLBACK STORAGE VERCEL (Read local storage folder directly) ---
+Route::get('/storage/{path}', function ($path) {
+    if (file_exists(storage_path('app/public/' . $path))) {
+        return response()->file(storage_path('app/public/' . $path));
+    }
+    abort(404);
+})->where('path', '.*');
